@@ -18,12 +18,38 @@ export class InMemoryPrisma {
   seedDefaultData() {
     const defaultPasswordHash = "$2a$10$JfiacuJ9zY5DsXa.yxBEB.uZHKw1.KHUoqPQ.fxgj3AqpWpVXYKPW"; // "Password123!"
 
-    // 1. Users
+    // 1. Users (Configured with requested Indian names & roles)
+    const sonu = {
+      id: "user-sonu-uuid",
+      email: "sonu@example.com",
+      passwordHash: defaultPasswordHash,
+      name: "Sonu Gupta",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const niraj = {
+      id: "user-niraj-uuid",
+      email: "niraj@example.com",
+      passwordHash: defaultPasswordHash,
+      name: "Niraj Kumar Sahani",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const aryan = {
+      id: "user-aryan-uuid",
+      email: "aryan@example.com",
+      passwordHash: defaultPasswordHash,
+      name: "Aryan Kumar",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Aliases for backward test compatibility
     const alice = {
       id: "user-alice-uuid",
       email: "alice@example.com",
       passwordHash: defaultPasswordHash,
-      name: "Alice Owner",
+      name: "Sonu Gupta",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -31,7 +57,7 @@ export class InMemoryPrisma {
       id: "user-bob-uuid",
       email: "bob@example.com",
       passwordHash: defaultPasswordHash,
-      name: "Bob Collaborator",
+      name: "Niraj Kumar Sahani",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -39,19 +65,19 @@ export class InMemoryPrisma {
       id: "user-charlie-uuid",
       email: "charlie@example.com",
       passwordHash: defaultPasswordHash,
-      name: "Charlie Viewer",
+      name: "Aryan Kumar",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    this.users.push(alice, bob, charlie);
+    this.users.push(sonu, niraj, aryan, alice, bob, charlie);
 
     // 2. Default Workspace
     const ws = {
       id: "ws-engineering-uuid",
       name: "Engineering Workspace",
       description: "Core Product Engineering Team",
-      ownerId: alice.id,
+      ownerId: sonu.id,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -60,10 +86,38 @@ export class InMemoryPrisma {
     // 3. Memberships
     this.workspaceMembers.push(
       {
+        id: "mem-sonu-uuid",
+        workspaceId: ws.id,
+        userId: sonu.id,
+        role: WorkspaceRole.OWNER,
+        joinedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "mem-niraj-uuid",
+        workspaceId: ws.id,
+        userId: niraj.id,
+        role: WorkspaceRole.MEMBER,
+        joinedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "mem-aryan-uuid",
+        workspaceId: ws.id,
+        userId: aryan.id,
+        role: WorkspaceRole.VIEWER,
+        joinedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
         id: "mem-alice-uuid",
         workspaceId: ws.id,
         userId: alice.id,
         role: WorkspaceRole.OWNER,
+        joinedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -72,6 +126,7 @@ export class InMemoryPrisma {
         workspaceId: ws.id,
         userId: bob.id,
         role: WorkspaceRole.MEMBER,
+        joinedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -80,6 +135,7 @@ export class InMemoryPrisma {
         workspaceId: ws.id,
         userId: charlie.id,
         role: WorkspaceRole.VIEWER,
+        joinedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       }

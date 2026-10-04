@@ -163,25 +163,28 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
+              id="autofill-owner-btn"
               type="button"
               className="btn-mini"
-              onClick={() => fillDemoAccount("alice@example.com", "Password123!")}
+              onClick={() => fillDemoAccount("sonu@example.com", "Password123!")}
             >
-              Alice (Owner)
+              Sonu Gupta (Owner)
             </button>
             <button
+              id="autofill-member-btn"
               type="button"
               className="btn-mini"
-              onClick={() => fillDemoAccount("bob@example.com", "Password123!")}
+              onClick={() => fillDemoAccount("niraj@example.com", "Password123!")}
             >
-              Bob (Member)
+              Niraj Kumar Sahani (Member)
             </button>
             <button
+              id="autofill-viewer-btn"
               type="button"
               className="btn-mini"
-              onClick={() => fillDemoAccount("owner@test.com", "Password123!")}
+              onClick={() => fillDemoAccount("aryan@example.com", "Password123!")}
             >
-              Owner Test
+              Aryan Kumar (Viewer)
             </button>
           </div>
         </div>

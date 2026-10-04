@@ -13,9 +13,9 @@ A high-concurrency, multi-tenant collaborative workspace engineered for enterpri
 - **Hosted Database**: Managed PostgreSQL (Render PostgreSQL / Neon / Supabase DB)
 - **Hosted Cache & Queue**: Managed Redis (Render Redis / Upstash)
 - **Preconfigured Test Accounts**:
-  - **Account 1 (Owner)**: `alice@example.com` / `Password123!` (Role: `OWNER` — Full control, member invites, role management, task CRUD)
-  - **Account 2 (Member)**: `bob@example.com` / `Password123!` (Role: `MEMBER` — Normal task management, moves, ordering; no member administration)
-  - **Account 3 (Viewer)**: `charlie@example.com` / `Password123!` (Role: `VIEWER` — Read-only observation mode; all mutations blocked)
+  - **Account 1 (Owner)**: `sonu@example.com` / `Password123!` (Name: **Sonu Gupta**, Role: `OWNER` — Full control, member invites, role management, task CRUD)
+  - **Account 2 (Member)**: `niraj@example.com` / `Password123!` (Name: **Niraj Kumar Sahani**, Role: `MEMBER` — Normal task management, moves, ordering; no member administration)
+  - **Account 3 (Viewer)**: `aryan@example.com` / `Password123!` (Name: **Aryan Kumar**, Role: `VIEWER` — Read-only observation mode; all mutations blocked)
 
 ---
 

@@ -4,29 +4,31 @@ async function verifyAll() {
   console.log("=== PHASE 9 VERIFICATION SUITE ===");
 
   // 1. Test Login
-  console.log("\n[Test 1] Testing Login for Alice (Owner)...");
-  const aliceRes = await fetch("http://localhost:5000/api/v1/auth/login", {
+  console.log("\n[Test 1] Testing Login for Sonu Gupta (Owner)...");
+  const sonuRes = await fetch("http://localhost:5000/api/v1/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "alice@example.com", password: "Password123!" }),
+    body: JSON.stringify({ email: "sonu@example.com", password: "Password123!" }),
   });
-  const aliceAuth: any = await aliceRes.json();
-  if (!aliceRes.ok || !aliceAuth.tokens?.accessToken) {
-    throw new Error(`Alice login failed: ${JSON.stringify(aliceAuth)}`);
+  const sonuAuth: any = await sonuRes.json();
+  if (!sonuRes.ok || !sonuAuth.tokens?.accessToken) {
+    throw new Error(`Sonu Gupta login failed: ${JSON.stringify(sonuAuth)}`);
   }
-  const aliceToken = aliceAuth.tokens.accessToken;
-  console.log("✓ Alice logged in successfully. ID:", aliceAuth.user.id);
+  const sonuToken = sonuAuth.tokens.accessToken;
+  const aliceToken = sonuToken; // Alias
+  console.log("✓ Sonu Gupta logged in successfully. ID:", sonuAuth.user.id);
 
-  // Test Login for Bob (Member / Viewer)
-  console.log("\n[Test 2] Testing Login for Bob...");
-  const bobRes = await fetch("http://localhost:5000/api/v1/auth/login", {
+  // Test Login for Niraj Kumar Sahani (Member)
+  console.log("\n[Test 2] Testing Login for Niraj Kumar Sahani (Member)...");
+  const nirajRes = await fetch("http://localhost:5000/api/v1/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "bob@example.com", password: "Password123!" }),
+    body: JSON.stringify({ email: "niraj@example.com", password: "Password123!" }),
   });
-  const bobAuth: any = await bobRes.json();
-  const bobToken = bobAuth.tokens?.accessToken;
-  console.log("✓ Bob logged in successfully. ID:", bobAuth.user.id);
+  const nirajAuth: any = await nirajRes.json();
+  const nirajToken = nirajAuth.tokens?.accessToken;
+  const bobToken = nirajToken; // Alias
+  console.log("✓ Niraj Kumar Sahani logged in successfully. ID:", nirajAuth.user.id);
 
   // 2. Test Workspace
   console.log("\n[Test 3] Testing Workspace Fetch...");
