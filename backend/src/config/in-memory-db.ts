@@ -18,10 +18,10 @@ export class InMemoryPrisma {
   seedDefaultData() {
     const defaultPasswordHash = "$2a$10$JfiacuJ9zY5DsXa.yxBEB.uZHKw1.KHUoqPQ.fxgj3AqpWpVXYKPW"; // "Password123!"
 
-    // 1. Users (Configured with requested Indian names & roles)
+    // 1. Users (Configured with requested Indian names & Gmail accounts)
     const sonu = {
       id: "user-sonu-uuid",
-      email: "sonu@example.com",
+      email: "sonugupta@gmail.com",
       passwordHash: defaultPasswordHash,
       name: "Sonu Gupta",
       createdAt: new Date(),
@@ -29,7 +29,7 @@ export class InMemoryPrisma {
     };
     const niraj = {
       id: "user-niraj-uuid",
-      email: "niraj@example.com",
+      email: "nirajkumarsahani@gmail.com",
       passwordHash: defaultPasswordHash,
       name: "Niraj Kumar Sahani",
       createdAt: new Date(),
@@ -37,40 +37,14 @@ export class InMemoryPrisma {
     };
     const aryan = {
       id: "user-aryan-uuid",
-      email: "aryan@example.com",
+      email: "aryankumar@gmail.com",
       passwordHash: defaultPasswordHash,
       name: "Aryan Kumar",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    // Aliases for backward test compatibility
-    const alice = {
-      id: "user-alice-uuid",
-      email: "alice@example.com",
-      passwordHash: defaultPasswordHash,
-      name: "Sonu Gupta",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const bob = {
-      id: "user-bob-uuid",
-      email: "bob@example.com",
-      passwordHash: defaultPasswordHash,
-      name: "Niraj Kumar Sahani",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const charlie = {
-      id: "user-charlie-uuid",
-      email: "charlie@example.com",
-      passwordHash: defaultPasswordHash,
-      name: "Aryan Kumar",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    this.users.push(sonu, niraj, aryan, alice, bob, charlie);
+    this.users.push(sonu, niraj, aryan);
 
     // 2. Default Workspace
     const ws = {
@@ -83,7 +57,7 @@ export class InMemoryPrisma {
     };
     this.workspaces.push(ws);
 
-    // 3. Memberships
+    // 3. Memberships (Exactly 3 distinct Indian accounts per role)
     this.workspaceMembers.push(
       {
         id: "mem-sonu-uuid",
@@ -107,33 +81,6 @@ export class InMemoryPrisma {
         id: "mem-aryan-uuid",
         workspaceId: ws.id,
         userId: aryan.id,
-        role: WorkspaceRole.VIEWER,
-        joinedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "mem-alice-uuid",
-        workspaceId: ws.id,
-        userId: alice.id,
-        role: WorkspaceRole.OWNER,
-        joinedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "mem-bob-uuid",
-        workspaceId: ws.id,
-        userId: bob.id,
-        role: WorkspaceRole.MEMBER,
-        joinedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "mem-charlie-uuid",
-        workspaceId: ws.id,
-        userId: charlie.id,
         role: WorkspaceRole.VIEWER,
         joinedAt: new Date(),
         createdAt: new Date(),
@@ -192,8 +139,8 @@ export class InMemoryPrisma {
         description: "Configured multi-tenant schema with Prisma migrations",
         priority: TaskPriority.HIGH,
         position: 1000,
-        creatorId: alice.id,
-        assigneeId: bob.id,
+        creatorId: sonu.id,
+        assigneeId: niraj.id,
         createdAt: new Date(Date.now() - 3600000 * 4),
         updatedAt: new Date(),
       },
@@ -205,8 +152,8 @@ export class InMemoryPrisma {
         description: "Server-side role authorization enforcing Owner/Admin/Member/Viewer rules",
         priority: TaskPriority.URGENT,
         position: 2000,
-        creatorId: alice.id,
-        assigneeId: alice.id,
+        creatorId: sonu.id,
+        assigneeId: sonu.id,
         createdAt: new Date(Date.now() - 3600000 * 3),
         updatedAt: new Date(),
       },
@@ -218,8 +165,8 @@ export class InMemoryPrisma {
         description: "Broadcast task mutations to connected board clients within 1s",
         priority: TaskPriority.HIGH,
         position: 1000,
-        creatorId: bob.id,
-        assigneeId: bob.id,
+        creatorId: niraj.id,
+        assigneeId: niraj.id,
         createdAt: new Date(Date.now() - 3600000 * 2),
         updatedAt: new Date(),
       },
@@ -231,7 +178,7 @@ export class InMemoryPrisma {
         description: "Test concurrent drag and drop movement with fractional positions",
         priority: TaskPriority.MEDIUM,
         position: 1000,
-        creatorId: alice.id,
+        creatorId: sonu.id,
         assigneeId: null,
         createdAt: new Date(Date.now() - 3600000 * 1),
         updatedAt: new Date(),
@@ -242,7 +189,7 @@ export class InMemoryPrisma {
     this.activityLogs.push({
       id: "act-1-uuid",
       workspaceId: ws.id,
-      userId: alice.id,
+      userId: sonu.id,
       action: "WORKSPACE_CREATED",
       entityType: "WORKSPACE",
       entityId: ws.id,
@@ -255,8 +202,26 @@ export class InMemoryPrisma {
   user = {
     findUnique: async ({ where, select }: any) => {
       let u = null;
-      if (where.email) u = this.users.find((x) => x.email.toLowerCase() === where.email.toLowerCase());
-      else if (where.id) u = this.users.find((x) => x.id === where.id);
+      if (where.email) {
+        const targetEmail = where.email.toLowerCase().trim();
+        u = this.users.find((x) => x.email.toLowerCase() === targetEmail);
+        if (!u) {
+          if (["sonu@gmail.com", "sonu@example.com", "alice@example.com", "sonu.gupta@gmail.com"].includes(targetEmail)) {
+            u = this.users.find((x) => x.id === "user-sonu-uuid");
+          } else if (["niraj@gmail.com", "niraj@example.com", "bob@example.com", "niraj.sahani@gmail.com"].includes(targetEmail)) {
+            u = this.users.find((x) => x.id === "user-niraj-uuid");
+          } else if (["aryan@gmail.com", "aryan@example.com", "charlie@example.com", "aryan.kumar@gmail.com"].includes(targetEmail)) {
+            u = this.users.find((x) => x.id === "user-aryan-uuid");
+          }
+        }
+      } else if (where.id) {
+        u = this.users.find((x) => x.id === where.id);
+        if (!u) {
+          if (where.id === "user-alice-uuid") u = this.users.find((x) => x.id === "user-sonu-uuid");
+          else if (where.id === "user-bob-uuid") u = this.users.find((x) => x.id === "user-niraj-uuid");
+          else if (where.id === "user-charlie-uuid") u = this.users.find((x) => x.id === "user-aryan-uuid");
+        }
+      }
       if (!u) return null;
       if (select) {
         const res: any = {};
@@ -268,9 +233,22 @@ export class InMemoryPrisma {
       return { ...u };
     },
     findFirst: async ({ where }: any = {}) => {
+      if (where?.email) {
+        const targetEmail = where.email.toLowerCase().trim();
+        let u = this.users.find((x) => x.email.toLowerCase() === targetEmail);
+        if (!u) {
+          if (["sonu@gmail.com", "sonu@example.com", "alice@example.com", "sonu.gupta@gmail.com"].includes(targetEmail)) {
+            u = this.users.find((x) => x.id === "user-sonu-uuid");
+          } else if (["niraj@gmail.com", "niraj@example.com", "bob@example.com", "niraj.sahani@gmail.com"].includes(targetEmail)) {
+            u = this.users.find((x) => x.id === "user-niraj-uuid");
+          } else if (["aryan@gmail.com", "aryan@example.com", "charlie@example.com", "aryan.kumar@gmail.com"].includes(targetEmail)) {
+            u = this.users.find((x) => x.id === "user-aryan-uuid");
+          }
+        }
+        if (u) return { ...u };
+      }
       const u = this.users.find((x) => {
         if (where?.id && x.id !== where.id) return false;
-        if (where?.email && x.email.toLowerCase() !== where.email.toLowerCase()) return false;
         return true;
       });
       return u ? { ...u } : null;

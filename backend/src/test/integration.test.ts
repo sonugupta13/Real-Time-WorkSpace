@@ -76,16 +76,16 @@ async function runIntegrationTests() {
     assert.strictEqual(badLoginRes.statusCode, 401, "Invalid password must return 401");
     console.log("✓ Login rejects invalid credentials with 401 Unauthorized.");
 
-    // Valid credentials (Alice - Owner)
+    // Valid credentials (Sonu Gupta - Owner)
     const loginRes = await makeRequest(
       server,
       { method: "POST", path: "/api/v1/auth/login" },
-      { email: "alice@example.com", password: "Password123!" }
+      { email: "sonugupta@gmail.com", password: "Password123!" }
     );
     assert.strictEqual(loginRes.statusCode, 200, "Valid login should return 200");
     const aliceToken = loginRes.body.tokens.accessToken;
     const aliceRefresh = loginRes.body.tokens.refreshToken;
-    assert.ok(aliceToken, "Alice access token present");
+    assert.ok(aliceToken, "Sonu access token present");
     console.log("✓ Login succeeds with 200 OK and returns access + refresh tokens.");
 
     console.log("\n[Integration Test 3] GET /api/v1/auth/me - Protected session verification");
@@ -95,7 +95,7 @@ async function runIntegrationTests() {
       headers: { Authorization: `Bearer ${aliceToken}` },
     });
     assert.strictEqual(meRes.statusCode, 200);
-    assert.strictEqual(meRes.body.user.email, "alice@example.com");
+    assert.strictEqual(meRes.body.user.email, "sonugupta@gmail.com");
     console.log("✓ Protected /auth/me returns authenticated user identity.");
 
     console.log("\n[Integration Test 4] POST /api/v1/auth/refresh - Token rotation");
@@ -199,11 +199,11 @@ async function runIntegrationTests() {
     console.log(`✓ Task moved to list "${lists[1].title}" at position 4500.`);
 
     console.log("\n[Integration Test 9] RBAC Guard: Rejection of task mutation by VIEWER");
-    // Login as Charlie (Viewer)
+    // Login as Aryan Kumar (Viewer)
     const charlieLoginRes = await makeRequest(
       server,
       { method: "POST", path: "/api/v1/auth/login" },
-      { email: "charlie@example.com", password: "Password123!" }
+      { email: "aryankumar@gmail.com", password: "Password123!" }
     );
     const charlieToken = charlieLoginRes.body.tokens.accessToken;
 

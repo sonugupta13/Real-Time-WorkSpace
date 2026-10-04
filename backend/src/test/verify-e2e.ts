@@ -8,7 +8,7 @@ async function verifyAll() {
   const sonuRes = await fetch("http://localhost:5000/api/v1/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "sonu@example.com", password: "Password123!" }),
+    body: JSON.stringify({ email: "sonugupta@gmail.com", password: "Password123!" }),
   });
   const sonuAuth: any = await sonuRes.json();
   if (!sonuRes.ok || !sonuAuth.tokens?.accessToken) {
@@ -23,7 +23,7 @@ async function verifyAll() {
   const nirajRes = await fetch("http://localhost:5000/api/v1/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "niraj@example.com", password: "Password123!" }),
+    body: JSON.stringify({ email: "nirajkumarsahani@gmail.com", password: "Password123!" }),
   });
   const nirajAuth: any = await nirajRes.json();
   const nirajToken = nirajAuth.tokens?.accessToken;

@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { InMemoryPrisma } from "./in-memory-db";
 
 const realPrisma = new PrismaClient({
-  log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  log: [],
 });
 
 const inMemoryDb = new InMemoryPrisma();
@@ -22,6 +22,7 @@ async function checkPostgres() {
     console.log("[Database] Connected to PostgreSQL on localhost:5432");
   } catch {
     isPostgresAvailable = false;
+    await realPrisma.$disconnect().catch(() => {});
     console.log("[Database] PostgreSQL not reachable on localhost:5432. Activating resilient in-memory tenant store.");
   }
   return isPostgresAvailable;

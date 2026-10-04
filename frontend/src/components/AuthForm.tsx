@@ -101,7 +101,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               id="auth-email-input"
               type="email"
               className="form-input"
-              placeholder="user@example.com"
+              placeholder="user@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -166,7 +166,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               id="autofill-owner-btn"
               type="button"
               className="btn-mini"
-              onClick={() => fillDemoAccount("sonu@example.com", "Password123!")}
+              onClick={() => fillDemoAccount("sonugupta@gmail.com", "Password123!")}
             >
               Sonu Gupta (Owner)
             </button>
@@ -174,7 +174,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               id="autofill-member-btn"
               type="button"
               className="btn-mini"
-              onClick={() => fillDemoAccount("niraj@example.com", "Password123!")}
+              onClick={() => fillDemoAccount("nirajkumarsahani@gmail.com", "Password123!")}
             >
               Niraj Kumar Sahani (Member)
             </button>
@@ -182,7 +182,7 @@ export default function AuthForm({ onAuthSuccess }: AuthFormProps) {
               id="autofill-viewer-btn"
               type="button"
               className="btn-mini"
-              onClick={() => fillDemoAccount("aryan@example.com", "Password123!")}
+              onClick={() => fillDemoAccount("aryankumar@gmail.com", "Password123!")}
             >
               Aryan Kumar (Viewer)
             </button>

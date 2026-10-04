@@ -129,7 +129,7 @@ export default function MembersView({
                 id="invite-email-input"
                 type="email"
                 className="form-input"
-                placeholder="colleague@example.com"
+                placeholder="colleague@gmail.com"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 required
