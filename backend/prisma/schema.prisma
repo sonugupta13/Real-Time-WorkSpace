@@ -1,0 +1,228 @@
+// ========================================================
+// Real-Time Collaborative Workspace - Prisma Database Schema
+// Database: PostgreSQL
+// Architectural Pattern: Multi-Tenant Workspace Boundary
+// ========================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------------------------
+// Enums
+// --------------------------------------------------------
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// --------------------------------------------------------
+// Identity & Authentication Models
+// --------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Workspaces created & owned by this user
+  ownedWorkspaces Workspace[] @relation("WorkspaceOwner")
+
+  // Workspace memberships (teams/organizations joined)
+  memberships WorkspaceMember[]
+
+  // Refresh tokens associated with active user sessions
+  refreshTokens RefreshToken[]
+
+  // Task assignments and authoring
+  assignedTasks Task[]        @relation("TaskAssignee")
+  createdTasks  Task[]        @relation("TaskCreator")
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  userAgent String?
+  ipAddress String?
+  isRevoked Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// --------------------------------------------------------
+// Multi-Tenant Workspace & Access Control Models
+// --------------------------------------------------------
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Owner relationship
+  owner User @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  // Memberships & RBAC
+  members WorkspaceMember[]
+
+  // Workspace-scoped resources (Strict Tenancy Boundary)
+  boards       Board[]
+  lists        List[]
+  tasks        Task[]
+  activityLogs ActivityLog[]
+
+  @@index([ownerId])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relationships
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // A user can only have one membership role per workspace
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@map("workspace_members")
+}
+
+// --------------------------------------------------------
+// Project Board, List & Task Models (Tenancy-Scoped)
+// --------------------------------------------------------
+
+model Board {
+  id          String   @id @default(uuid())
+  workspaceId String
+  title       String
+  description String?
+  position    Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lists     List[]
+
+  // Indexes for high performance workspace queries
+  @@index([workspaceId])
+  @@index([workspaceId, position])
+  @@map("boards")
+}
+
+model List {
+  id          String   @id @default(uuid())
+  workspaceId String
+  boardId     String
+  title       String
+  position    Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+
+  // Multi-tenant scoped indexes and ordering
+  @@index([workspaceId])
+  @@index([boardId, position])
+  @@index([workspaceId, boardId])
+  @@map("lists")
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  workspaceId String
+  listId      String
+  title       String
+  description String?      @db.Text
+  label       String?
+  position    Float        @default(0)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  assigneeId  String?
+  creatorId   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relationships
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  list      List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  assignee  User?     @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creator   User      @relation("TaskCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  // Multi-tenant scoped indexes and ordering
+  @@index([workspaceId])
+  @@index([listId, position])
+  @@index([workspaceId, listId])
+  @@index([assigneeId])
+  @@index([label])
+  @@map("tasks")
+}
+
+// --------------------------------------------------------
+// Audit & Activity Log Model (Workspace-Scoped)
+// --------------------------------------------------------
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+  action      String   // e.g., "TASK_CREATED", "TASK_MOVED", "ROLE_UPDATED"
+  entityType  String   // e.g., "WORKSPACE", "BOARD", "LIST", "TASK", "MEMBER"
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Multi-tenant scoped indexes for auditing and timelines
+  @@index([workspaceId])
+  @@index([workspaceId, createdAt])
+  @@index([userId])
+  @@map("activity_logs")
+}
