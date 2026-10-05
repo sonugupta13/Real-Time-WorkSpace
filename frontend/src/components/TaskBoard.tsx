@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { taskApi, listApi, boardApi } from "../services/api";
 
-interface KanbanBoardProps {
+interface TaskBoardProps {
   workspaceId: string;
   token: string;
   boards: any[];
@@ -16,7 +16,7 @@ interface KanbanBoardProps {
   recentUpdatedTaskId: string | null;
 }
 
-export default function KanbanBoard({
+export default function TaskBoard({
   workspaceId,
   token,
   boards,
@@ -27,7 +27,7 @@ export default function KanbanBoard({
   members,
   onOpenExportModal,
   recentUpdatedTaskId,
-}: KanbanBoardProps) {
+}: TaskBoardProps) {
   // Modal states
   const [showCreateBoardModal, setShowCreateBoardModal] = useState(false);
   const [newBoardTitle, setNewBoardTitle] = useState("");

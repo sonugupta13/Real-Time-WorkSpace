@@ -31,25 +31,27 @@ async function checkPostgres() {
 // Trigger check immediately in background
 checkPostgres().catch(() => {});
 
+const defaultTransactionWrapper = async (arg: any) => {
+  const available = await checkPostgres();
+  if (available) {
+    try {
+      return await realPrisma.$transaction(arg);
+    } catch (err: any) {
+      if (err?.message?.includes("Can't reach database server") || err?.code === "P1001") {
+        isPostgresAvailable = false;
+        return inMemoryDb.$transaction(arg);
+      }
+      throw err;
+    }
+  }
+  return inMemoryDb.$transaction(arg);
+};
+
 // Create transparent proxy delegating to real Prisma or in-memory fallback
 export const prisma: PrismaClient = new Proxy(realPrisma, {
   get(target: any, prop: string | symbol) {
     if (prop === "$transaction") {
-      return async (arg: any) => {
-        const available = await checkPostgres();
-        if (available) {
-          try {
-            return await target.$transaction(arg);
-          } catch (err: any) {
-            if (err?.message?.includes("Can't reach database server") || err?.code === "P1001") {
-              isPostgresAvailable = false;
-              return inMemoryDb.$transaction(arg);
-            }
-            throw err;
-          }
-        }
-        return inMemoryDb.$transaction(arg);
-      };
+      return target._customTransaction || defaultTransactionWrapper;
     }
 
     if (prop in inMemoryDb) {
@@ -59,20 +61,28 @@ export const prisma: PrismaClient = new Proxy(realPrisma, {
       if (typeof memModel === "object" && memModel !== null) {
         return new Proxy(memModel, {
           get(mTarget: any, mProp: string) {
-            return async (...args: any[]) => {
-              const available = await checkPostgres();
-              if (available && realModel && typeof realModel[mProp] === "function") {
-                try {
-                  return await realModel[mProp](...args);
-                } catch (err: any) {
-                  if (err?.message?.includes("Can't reach database server") || err?.code === "P1001") {
-                    isPostgresAvailable = false;
-                    return mTarget[mProp](...args);
-                  }
-                  throw err;
-                }
+            if (typeof mTarget[mProp] !== "function") {
+              return mTarget[mProp];
+            }
+            return (...args: any[]) => {
+              if (isPostgresAvailable === false) {
+                return mTarget[mProp](...args);
               }
-              return mTarget[mProp](...args);
+              return (async () => {
+                const available = await checkPostgres();
+                if (available && realModel && typeof realModel[mProp] === "function") {
+                  try {
+                    return await realModel[mProp](...args);
+                  } catch (err: any) {
+                    if (err?.message?.includes("Can't reach database server") || err?.code === "P1001") {
+                      isPostgresAvailable = false;
+                      return mTarget[mProp](...args);
+                    }
+                    throw err;
+                  }
+                }
+                return mTarget[mProp](...args);
+              })();
             };
           },
         });
@@ -80,6 +90,18 @@ export const prisma: PrismaClient = new Proxy(realPrisma, {
     }
 
     return target[prop];
+  },
+  set(target: any, prop: string | symbol, value: any) {
+    if (prop === "$transaction") {
+      if (value === defaultTransactionWrapper || !value) {
+        delete target._customTransaction;
+      } else {
+        target._customTransaction = value;
+      }
+      return true;
+    }
+    target[prop] = value;
+    return true;
   },
 });
 

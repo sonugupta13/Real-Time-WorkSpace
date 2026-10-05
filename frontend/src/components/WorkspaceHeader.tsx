@@ -131,7 +131,7 @@ export default function WorkspaceHeader({
             className={`tab-btn ${activeTab === "board" ? "active" : ""}`}
             onClick={() => onSelectTab("board")}
           >
-            📋 Kanban Board
+            📋 Task Board
           </button>
 
           <button

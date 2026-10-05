@@ -42,7 +42,9 @@ async function runSearchAndActivityTests() {
     let capturedSearchWhere: any = null;
 
     (prisma.$transaction as any) = async (promises: any[]) => {
-      // Return mock count and mock items
+      if (Array.isArray(promises)) {
+        await Promise.all(promises.map((p: any) => Promise.resolve(p).catch(() => {})));
+      }
       return [
         2,
         [

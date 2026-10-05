@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import AuthForm from "../components/AuthForm";
 import WorkspaceHeader from "../components/WorkspaceHeader";
-import KanbanBoard from "../components/KanbanBoard";
+import TaskBoard from "../components/TaskBoard";
 import MembersView from "../components/MembersView";
 import SearchView from "../components/SearchView";
 import ActivityLogView from "../components/ActivityLogView";
@@ -340,7 +340,7 @@ export default function App() {
         ) : (
           <>
             {activeTab === "board" && (
-              <KanbanBoard
+              <TaskBoard
                 workspaceId={activeWorkspaceId}
                 token={token}
                 boards={boards}
