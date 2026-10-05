@@ -6,9 +6,10 @@ import workspaceRouter from "./routes/workspace.routes";
 export const app = express();
 
 // Middlewares
+const corsOrigin = process.env.CORS_ORIGIN;
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: !corsOrigin || corsOrigin === "*" ? true : corsOrigin,
     credentials: true,
   })
 );
@@ -35,9 +36,11 @@ app.get("/api/v1/health", (_req: Request, res: Response) => {
 
 // Authentication Routes
 app.use("/api/v1/auth", authRouter);
+app.use("/auth", authRouter);
 
 // Workspace & RBAC Routes
 app.use("/api/v1/workspaces", workspaceRouter);
+app.use("/workspaces", workspaceRouter);
 
 // 404 Catch-All Handler
 app.use((_req: Request, res: Response) => {

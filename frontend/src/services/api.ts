@@ -1,4 +1,13 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+function getApiBase(): string {
+  let base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1").trim();
+  base = base.replace(/\/+$/, "");
+  if (!base.endsWith("/api/v1")) {
+    base = `${base}/api/v1`;
+  }
+  return base;
+}
+
+const API_BASE = getApiBase();
 
 interface RequestOptions extends RequestInit {
   token?: string | null;
